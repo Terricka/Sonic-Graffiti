@@ -1,0 +1,112 @@
+@font-face {
+    font-family: Pixels;
+    src: url("fonts/PixelOperator.ttf");
+}
+
+
+body {
+  width:90vw;
+  height:87vh;
+  padding: 5vh 5vw;
+  margin: 0;
+  font-family:"Pixels";
+}
+
+#wrapper {
+  width:100%;
+  height:100%;
+}
+
+#control {
+  width:25vw;
+  height:100%;
+  background-color: #EDEDED;
+}
+
+.control-panel {
+  width:100%;
+  height:24.9%;
+  border-bottom:1px solid #fff;
+  text-align: center;
+  margin:0;
+  padding:0;
+  font-size:5em;
+  cursor:pointer;
+}
+
+.control-panel span {
+  position: relative;
+  top: 33%;
+  transform: translateY(-50%);
+}
+
+.fa-play:hover {
+  color:olive;
+}
+
+.fa-stop:hover {
+  color:grey;
+}
+
+.fa-circle-o:hover {
+  color:tomato;
+}
+
+.panel-tag {
+  transform: rotate(90deg);
+  position:absolute;
+  font-size:.25em;
+  left:4.5vw;
+}
+
+#tempo-tag  {
+  bottom:60px;
+}
+
+#synth-tag {
+  bottom:212px;
+  padding-left:5px;
+}
+
+#record-tag {
+  bottom:397px;
+}
+
+#play-tag {
+  bottom:562px;
+  padding-left:13px;
+}
+
+#tempo {
+  font-size:1.6em;
+  font-weight:600;
+  top:20px;
+}
+
+.fa-stop {
+  display:none;
+}
+
+#waves {
+  list-style:none;
+  padding:0;
+  font-size:.25em;
+  position: relative;
+  top: 63%;
+  transform: translateY(350%);
+}
+
+.wave {
+  display: inline;
+  padding:5px;
+}
+
+#wave-range {
+  position:relative;
+  top:60px;
+}
+
+.active-wave {
+  font-weight:800;
+  font-size:1.025em;
+}
