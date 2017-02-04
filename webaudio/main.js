@@ -1,42 +1,104 @@
 var audioContext = new AudioContext();
-var playButton = $("#play-button");
+var playButton = $("#on-off");
 var counter = 0;
 var selectedWave;
 
+var soundDirectory = "sounds/";
+
 var audioBuffer;
-var getSound = new XMLHttpRequest();
+var soundTime = 0;
 
-getSound.open("get", "sounds/hat.wav", true);
-getSound.responseType = "arraybuffer";
+function audioFileLoad(soundDirectory) {
+  var sounds = {};
+  var playSound = undefined;
+  var getSound = new XMLHttpRequest();
+  sounds.soundDirectory = soundDirectory;
+  getSound.open("GET", sounds.soundDirectory, true);
+  getSound.responseType = "arraybuffer";
+  getSound.onload = function() {
+    audioContext.decodeAudioData(getSound.response, function(buffer) {
+      sounds.playThis = buffer;
+    });
+  };
 
-getSound.onload = function() {
-  audioContext.decodeAudioData(getSound.response, function(buffer) {
-    audioBuffer = buffer;
-  });
-};
+  getSound.send();
 
-getSound.send();
+  sounds.play = function(time, soundStart, soundDuration) {
+    playSound = audioContext.createBufferSource();
+    playSound.buffer = sounds.playThis;
+    soundTime = playSound.buffer.duration;
+    // playSound.loopStart = 2;
+    // playSound.loop = true;
+    playSound.connect(audioContext.destination);
+    playSound.start(audioContext.currentTime + time ||
+      audioContext.currentTime);
+  };
 
-function playback() {
-  var playSound = audioContext.createBufferSource();
-  playSound.buffer = audioBuffer;
-  playSound.connect(audioContext.destination);
-  playSound.start(audioContext.currentTime);
+  sounds.stop = function(time) {
+    playSound.stop(audioContext.currentTime + time ||
+      audioContext.currentTime, soundStart || 0, soundDuration ||
+      sounds.playThis.duration);
+  };
+
+  return sounds;
+
 }
 
-window.addEventListener("mousedown", playback);
+function audioBatchLoad(obj) {
+  for (var prop in obj) {
+    obj[prop] = audioFileLoad(obj[prop]);
+  }
+
+  return obj;
+}
+
+var sounds = audioBatchLoad({
+
+  kick: "sounds/drum.wav",
+  hat: "sounds/hat.wav",
 
 
-
-$('.wave').each(function() {
-  $(this).click(function() {
-    $('.wave').each(function() {
-      $(this).removeClass("active-wave");
-    });
-    $(this).toggleClass("active-wave");
-    selectedWave = $(this).text();
-  });
 });
+
+window.addEventListener("mousedown", function() {
+  sounds.kick.play(0, 1, 3);
+});
+
+// var getSound = new XMLHttpRequest();
+// sounds.fileDirectory = soundDirectory;
+//
+//
+// getSound.open("get", sounds.soundDirectory, true);
+// getSound.responseType = "arraybuffer";
+//
+// getSound.onload = function() {
+//   audioContext.decodeAudioData(getSound.response, function(buffer) {
+//     audioBuffer = buffer;
+//   });
+// };
+//
+// getSound.send();
+//
+// function playback() {
+//   var playSound = audioContext.createBufferSource();
+//   playSound.buffer = audioBuffer;
+//   playSound.connect(audioContext.destination);
+//   playSound.start(audioContext.currentTime);
+// }
+//
+// window.addEventListener("mousedown", playback);
+
+
+
+// $('.wave').each(function() {
+//   $(this).click(function() {
+//     $('.wave').each(function() {
+//       $(this).removeClass("active-wave");
+//     });
+//     $(this).toggleClass("active-wave");
+//     selectedWave = $(this).text();
+//   });
+// });
 
 // window.onload = function() {
 //
