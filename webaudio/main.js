@@ -8,7 +8,7 @@ var soundDirectory = "sounds/";
 var audioBuffer;
 var soundTime = 0;
 
-function audioFileLoad(soundDirectory) {
+function audioFileLoad(soundDirectory, callback) {
   var sounds = {};
   var playSound = undefined;
   var getSound = new XMLHttpRequest();
@@ -26,18 +26,22 @@ function audioFileLoad(soundDirectory) {
   sounds.play = function(time, soundStart, soundDuration) {
     playSound = audioContext.createBufferSource();
     playSound.buffer = sounds.playThis;
-    soundTime = playSound.buffer.duration;
-    // playSound.loopStart = 2;
-    // playSound.loop = true;
-    playSound.connect(audioContext.destination);
+    // playSound.connect(audioContext.destination);
     playSound.start(audioContext.currentTime + time ||
       audioContext.currentTime);
+    // callback(playSound);
+
+    if (typeof callback === "function") {
+      return callback(playSound);
+    } else {
+      return playSound.connect(audioContext.destination);
+    }
+
   };
 
-  sounds.stop = function(time) {
+  sounds.stop = function(time, setStart, setDuration) {
     playSound.stop(audioContext.currentTime + time ||
-      audioContext.currentTime, soundStart || 0, soundDuration ||
-      sounds.playThis.duration);
+      audioContext.currentTime);
   };
 
   return sounds;
@@ -45,23 +49,42 @@ function audioFileLoad(soundDirectory) {
 }
 
 function audioBatchLoad(obj) {
-  for (var prop in obj) {
-    obj[prop] = audioFileLoad(obj[prop]);
+  var callback;
+  var prop;
+
+  for (prop in obj) {
+    if (typeof obj[prop] === "function") {
+      callback = obj[prop];
+      delete obj[prop];
+    }
+  }
+
+  for (prop in obj) {
+    obj[prop] = audioFileLoad(obj[prop], callback);
   }
 
   return obj;
 }
 
-var sounds = audioBatchLoad({
+var sounds = {
 
   kick: "sounds/drum.wav",
   hat: "sounds/hat.wav",
+  nos: "sounds/Nostalgia.mp3",
+  nodeGraph: function nodeGraph(sound) {
+    var gain = audioContext.createGain();
+    gain.gain.value = 1;
+    sound.connect(gain);
+    gain.connect(audioContext.destination);
+  }
 
 
-});
+};
+
+var sound = audioBatchLoad(sounds);
 
 window.addEventListener("mousedown", function() {
-  sounds.kick.play(0, 1, 3);
+  sounds.kick.play();
 });
 
 // var getSound = new XMLHttpRequest();
