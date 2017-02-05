@@ -11,13 +11,15 @@
 
   <link rel="stylesheet" type="text/css" href="styles.css">
   <!-- this line removes any default padding and style. you might only need one of these values set. -->
-
+  <script src="main.js"></script>
+  <script src="audio.js"></script>
 </head>
 
 <body>
-  <div id="instruction-bar">
-      Instructions
-  </div>
+  <p id="instruction-bar" class="bin-count">
+      Bin Count: <b class="bin-count-number"></b>
+  </p>
+
   <div id="wrapper">
     <div id="control">
       <div id="play-status" class="control-panel">
@@ -48,17 +50,21 @@
                     <li id="square-select" class="wave active-wave">square</li>
 
                 </ul>
-                <input type="range" id="wave-range">
+                <input type="range" id="wave-range" val="500">
             </div>
 
       </div>
 
       <div id="tempo-status" class="control-panel">
           <p id="tempo-tag" class="panel-tag">tempo</p>
-          <span id="tempo">123</span>
+          <span id="showTempo">123</span>
+
+              <input id="tempo" type="range" min="30.0"
+              max="160.0" step="1" value="120" >
+
       </div>
 
-    </div><!-- end control -->
+    </div>
 
     <div id="sound-slots">
       <div id="slot-1" class="slot">
@@ -87,11 +93,24 @@
       </div>
 
     </div>
+    <div class="app-grid">
 
-    <div id="grid">
+      <div id="grid-controls">
+        <button class="play-stop-button">
+            Play/Stop
+        </button>
 
-    </div> <!-- end grid -->
-  </div><!-- end wrapper -->
-  <script src="main.js"></script>
+        <button id="metronome">
+          Toggle Metronome
+        </button>
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="synth.js"></script>
 </body>
 </html>

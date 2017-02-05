@@ -6,43 +6,141 @@ var selectedWave;
 var soundDirectory = "sounds/";
 
 var audioBuffer;
-var nextBeat = audioContext.currentTime;
-var counter = 1;
-var tempo = 70;
-var secs = 60 / tempo;
-var counterTime = (secs / 1);
-var osc = audioContext.createOscillator();
-var metroVol = audioContext.createGain();
 
-function metronome(time) {
-  osc = audioContext.createOscillator();
-  osc.connect(metroVol);
-  metroVol.connect(audioContext.destination);
-  osc.frequency.value = 500;
-  osc.start(time);
-  osc.stop(time + 0.1);
+$(function() {
+  var nextBeat = audioContext.currentTime;
+  var counter = 1;
+  var tempo = 120;
+  var osc = audioContext.createOscillator();
+  var metroVol = audioContext.createGain();
+  timerID = undefined;
+  isPlaying = false;
 
-}
+  var drum = audioFileLoad("sounds/drum.wav");
+  var hat = audioFileLoad("sounds/hat.wav");
 
-function schedule() {
-  if (nextBeat < audioContext.currentTime + 0.1) {
-    console.log("This is beat: " + counter);
-    metronome(nextBeat);
-    nextBeat += counterTime;
-    if (counter === 1) {
-      osc.frequency.value = 500;
-    } else {
-      osc.frequency.value = 300;
+  var drumTrack = [];
+  var hatTrack = [];
+
+  function playSchedule(trackArray, sound, count, time) {
+    for (var i = 0; i < trackArray.length; i++) {
+      if (count === trackArray[i]) {
+        sound.play(time);
+      }
     }
+  }
+
+  function metronome(time, playing) {
+    if (playing) {
+
+      osc = audioContext.createOscillator();
+      osc.connect(metroVol);
+      metroVol.connect(audioContext.destination);
+      if (counter === 1) {
+        osc.frequency.value = 500;
+      } else {
+        osc.frequency.value = 300;
+      }
+
+      osc.start(time);
+      osc.stop(time + 0.1);
+
+    }
+
+  }
+
+  function schedule() {
+    if (nextBeat < audioContext.currentTime + 0.1) {
+      metronome(nextBeat, true);
+
+      playSchedule(drumTrack, drum, counter, nextBeat - audioContext.currentTime);
+      playSchedule(hatTrack, hat, counter, nextBeat - audioContext.currentTime);
+
+      playBeat();
+    }
+    timerID = window.setTimeout(schedule, 0);
+  }
+
+  // schedule();
+
+  function play() {
+    isPlaying = !isPlaying;
+
+    if (isPlaying) {
+      counter = 1;
+      nextBeat = audioContext.currentTime;
+      schedule();
+    } else {
+      window.clearTimeout(timerID);
+    }
+  }
+
+  for (var i = 1; i <= 4; i++) {
+    var grid = $(".app-grid");
+    $(grid).append("<div class='track-" + i + "-container'></div>");
+    for (var j = 1; j < 17; j++) {
+      $(".track-" + i + "-container").append(
+        "<div class='grid-item track-step step-" + j + "'></div>");
+    }
+  }
+
+  function sequenceGrid(domEle, arr) {
+    $(domEle).on("mousedown", ".grid-item", function() {
+      // get index of grid item
+      var gridIndex = $(this).index();
+      console.log(gridIndex);
+      // add one at start instead of 0
+      var offset = gridIndex + 1;
+      // checks if value is in array
+      var index = arr.indexOf(offset);
+
+      if (index > -1) {
+        arr.splice(index, 1);
+        // set color to default
+        $(this).css("background-color", "");
+      } else {
+        // if item doesn exist
+        arr.push(offset);
+
+        $(this).css("background-color", "purple");
+      }
+
+    });
+  }
+
+  sequenceGrid(".track-1-container", drumTrack);
+  sequenceGrid(".track-2-container", hatTrack);
+
+  $(".play-stop-button").on("click", function() {
+    play();
+  });
+
+  function playBeat() {
+    var secs = 60 / tempo;
+    var counterTime = (secs / 4);
     counter++;
-    if (counter > 4) {
+    nextBeat += counterTime;
+    if (counter > 16) {
       counter = 1;
     }
   }
-  window.setTimeout(schedule, 0);
-}
 
-schedule();
+  $("#metronome").on("click", function() {
+    if (metroVol.gain.value) {
+      metroVol.gain.value = 0;
+    } else {
+      metroVol.gain.value = 1;
+    }
+  });
+
+  $("#tempo").on("change", function() {
+    tempo = this.value;
+    $("#showTempo").html(tempo);
+  });
+
+
+
+});
 
 function audioFileLoad(soundDirectory, callback) {
   var sounds = {};
@@ -146,66 +244,3 @@ window.addEventListener("mousedown", function() {
 // }
 //
 // window.addEventListener("mousedown", playback);
-
-
-
-// $('.wave').each(function() {
-//   $(this).click(function() {
-//     $('.wave').each(function() {
-//       $(this).removeClass("active-wave");
-//     });
-//     $(this).toggleClass("active-wave");
-//     selectedWave = $(this).text();
-//   });
-// });
-
-// window.onload = function() {
-//
-//
-//   var onOff = $('#on-off');
-//   var osc = false;
-//
-//   var freqSlider = $("#wave-range").val();
-//   // console.log(freqSlider);
-//
-//   setInterval(function() {
-//     if (!osc) {
-//       // console.log("Oscillator stopped. Waiting...");
-//     } else {
-//       freqSlider = $("#wave-range").val();
-//       osc.frequency.value = freqSlider;
-//       osc.type = selectedWave;
-//       // console.log("Oscillator playing on: " + freqSlider);
-//     }
-//   }, 50);
-//
-//   $(onOff).click(function() {
-//     if (!osc) {
-//
-//       osc = audioContext.createOscillator();
-//       osc.type = selectedWave;
-//       osc.frequency.value = freqSlider;
-//       osc.connect(audioContext.destination);
-//       osc.start(audioContext.currentTime);
-//
-//       counter++;
-//
-//     } else {
-//       osc.stop(audioContext.currentTime);
-//       osc = false;
-//       counter++;
-//     }
-//
-//
-//     if (counter % 2 === 0) {
-//       $("#on-off .fa-stop").hide();
-//       $(".fa-play").show();
-//     } else {
-//       $("#on-off .fa-stop").show();
-//       $(".fa-play").hide();
-//     }
-//   });
-//
-//
-//
-// };
