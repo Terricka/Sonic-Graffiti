@@ -6,7 +6,43 @@ var selectedWave;
 var soundDirectory = "sounds/";
 
 var audioBuffer;
-var soundTime = 0;
+var nextBeat = audioContext.currentTime;
+var counter = 1;
+var tempo = 70;
+var secs = 60 / tempo;
+var counterTime = (secs / 1);
+var osc = audioContext.createOscillator();
+var metroVol = audioContext.createGain();
+
+function metronome(time) {
+  osc = audioContext.createOscillator();
+  osc.connect(metroVol);
+  metroVol.connect(audioContext.destination);
+  osc.frequency.value = 500;
+  osc.start(time);
+  osc.stop(time + 0.1);
+
+}
+
+function schedule() {
+  if (nextBeat < audioContext.currentTime + 0.1) {
+    console.log("This is beat: " + counter);
+    metronome(nextBeat);
+    nextBeat += counterTime;
+    if (counter === 1) {
+      osc.frequency.value = 500;
+    } else {
+      osc.frequency.value = 300;
+    }
+    counter++;
+    if (counter > 4) {
+      counter = 1;
+    }
+  }
+  window.setTimeout(schedule, 0);
+}
+
+schedule();
 
 function audioFileLoad(soundDirectory, callback) {
   var sounds = {};
